@@ -1,44 +1,62 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+function KeyTarget({
+  label,
+  testID,
+}: {
+  readonly label: string;
+  readonly testID: string;
+}) {
+  const [lastKey, setLastKey] = useState('none');
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <View
+      focusable
+      onKeyDown={event => setLastKey(event.nativeEvent.key)}
+      style={styles.target}
+      testID={testID}>
+      <Text>
+        {label}, last key: {lastKey}
+      </Text>
+    </View>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+function App() {
+  const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View style={styles.screen}>
+      <KeyTarget label="Outside the Modal" testID="outside-target" />
+      <Pressable
+        onPress={() => setModalVisible(true)}
+        style={styles.button}
+        testID="open-modal">
+        <Text>Open the Modal</Text>
+      </Pressable>
+      <Modal visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.screen}>
+          <KeyTarget label="Inside the Modal" testID="inside-target" />
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    gap: 16,
+    padding: 48,
+  },
+  target: {
+    borderWidth: 1,
+    padding: 16,
+  },
+  button: {
+    borderWidth: 1,
+    padding: 16,
   },
 });
 

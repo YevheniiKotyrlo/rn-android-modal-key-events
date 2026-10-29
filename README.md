@@ -1,79 +1,22 @@
 # rn-android-modal-key-events
 
-![Build](https://github.com/YevheniiKotyrlo/rn-android-modal-key-events/workflows/Pre%20Merge%20Checks/badge.svg)
+On Android, with the `enableKeyEvents` feature flag on, a focused View inside a `<Modal>` never receives `onKeyDown`, while the same View outside the Modal does. This repository is [React Native's reproducer template](https://github.com/react-native-community/reproducer-react-native) (React Native 0.88.1) with two changes:
 
-This is your new React Native Reproducer project.
+- `MainApplication.kt` turns `enableKeyEvents` on after `loadReactNative`, the flag the View key events are behind.
+- `App.tsx` renders a focusable View with `onKeyDown` that shows the last key it received, a button that opens a `<Modal>`, and the same View inside the Modal.
 
-# Reproducer TODO list
+## Steps
 
-- [x] 1. Create a new reproducer project.
-- [ ] 2. Git clone your repository locally.
-- [ ] 3. Edit the project to reproduce the failure you're seeing.
-- [ ] 4. Push your changes, so that Github Actions can run the CI.
-- [ ] 5. Make sure the repository is public and share the link with the issue you reported.
+1. Clone and install:
+   ```sh
+   git clone https://github.com/YevheniiKotyrlo/rn-android-modal-key-events
+   cd rn-android-modal-key-events/ReproducerApp
+   yarn install
+   ```
+2. Build and install the app on an Android device or emulator: `cd android && ./gradlew assembleRelease` and `adb install -r app/build/outputs/apk/release/app-release.apk`.
+3. Start it. `adb shell input keyevent KEYCODE_TAB` focuses the first View, and `adb shell input keyevent KEYCODE_A` makes it show `Outside the Modal, last key: a`.
+4. Tap **Open the Modal**, then `adb shell input keyevent KEYCODE_TAB` (the View in the Modal takes focus) and `adb shell input keyevent KEYCODE_A`.
 
-# How to use this Reproducer
+Expected: `Inside the Modal, last key: a`.
 
-This project has been created with `npx @react-native-community/cli init` and is a vanilla React Native app.
-
-> [!IMPORTANT]  
-> Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/set-up-your-environment) so that you have a working environment locally.
-
-## Step 1: Start the Metro Server
-
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
-
-To start Metro, run the following command from the _root_ of your React Native project:
-
-```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-First, make sure you install dependencies with:
-
-```bash
-cd ios && bundle install && bundle exec pod install
-```
-
-Then you can run the iOS app with:
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+What I see on a Galaxy S23 (Android 14): `Inside the Modal, last key: none`, while `uiautomator dump` shows that View focused.
